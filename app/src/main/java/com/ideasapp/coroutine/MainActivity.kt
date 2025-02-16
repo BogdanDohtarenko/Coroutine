@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.concurrent.thread
@@ -35,17 +36,19 @@ class MainActivity : AppCompatActivity() {
         buttonLoad?.setOnClickListener {
             progress?.isVisible = true
             buttonLoad?.isEnabled = false
-            val jobCity = lifecycleScope.launch {
+            val jobCity = lifecycleScope.async {
                 val city = loadCity()
                 tvLocation?.text = city
+                city
             }
-            val jobTemp = lifecycleScope.launch {
+            val jobTemp = lifecycleScope.async {
                 val temperature = loadTemperature()
                 tvTemperature?.text = temperature.toString()
+                temperature
             }
             lifecycleScope.launch {
-                jobCity.join()
-                jobTemp.join()
+                val city = jobCity.join()
+                val temperature = jobTemp.join()
                 progress?.isVisible = false
                 buttonLoad?.isEnabled = true
             }
